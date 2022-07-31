@@ -1,5 +1,5 @@
 ﻿namespace CakeCompany.Service;
 
-internal class OrderService
+public class OrderService
 {
 }
