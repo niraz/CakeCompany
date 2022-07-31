@@ -1,10 +1,61 @@
-﻿using System.Diagnostics;
-using CakeCompany.Models;
-using CakeCompany.Models.Transport;
+﻿using CakeCompany.Contract.Provider;
+using Microsoft.Extensions.Logging;
 
 namespace CakeCompany.Provider;
 
-internal class ShipmentProvider
+public class ShipmentProvider : IShipmentProvider
+{
+    private readonly ILogger<ShipmentProvider> _logger;
+    private readonly IOrderQueryProvider _orderQueryProvider;
+    private readonly ICakeEstimatedBakeTimeProvider _cakeEstimatedBakeTimeProvider;
+    private readonly ICakeBakeProvider _cakeBakeProvider;
+    private readonly IPaymentProvider _paymentProvider;
+    private readonly ITransportProvider _transportProvider;
+    public ShipmentProvider(ILogger<ShipmentProvider> logger,
+        IOrderQueryProvider orderQueryProvider,
+        ICakeEstimatedBakeTimeProvider cakeEstimatedBakeTimeProvider,
+        ICakeBakeProvider cakeBakeProvider,
+        IPaymentProvider paymentProvider,
+        ITransportProvider transportProvider
+        )
+    {
+        _logger = logger;
+        _orderQueryProvider = orderQueryProvider;
+        _cakeEstimatedBakeTimeProvider = cakeEstimatedBakeTimeProvider;
+        _cakeBakeProvider = cakeBakeProvider;
+        _paymentProvider = paymentProvider;
+        _transportProvider = transportProvider;
+    }
+    public void GetShipment()
+    {
+        try
+        {
+            var orders = _orderQueryProvider.GetLatestOrders();
+            if (!orders.Any())
+            {
+                _logger.LogInformation("GetLatestOrders of OrderQueryProvider return empty result.");
+                return;
+            }
+            var products = orders.Where(x => _cakeEstimatedBakeTimeProvider.GetEstimatedBakeTime(x) <= x.EstimatedDeliveryTime
+                                        && _paymentProvider.Process(x).IsSuccessful)
+                             .Select(x => _cakeBakeProvider.Bake(x)).ToList();
+            if (!products.Any())
+            {
+                _logger.LogInformation("There is no cake to be deliverd.");
+                return;
+            }
+            var deliveryMedium = _transportProvider.CheckForAvailability(products);
+            deliveryMedium.Deliver(products);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, $"Exception occured during the processing of GetShipment method");
+            throw;
+        }
+    }
+}
+/* Legacy code 
+ * internal class ShipmentProvider
 {
     public void GetShipment()
     {
@@ -67,4 +118,4 @@ internal class ShipmentProvider
             ship.Deliver(products);
         }
     }
-}
+}*/

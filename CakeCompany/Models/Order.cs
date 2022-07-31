@@ -1,3 +1,6 @@
-﻿namespace CakeCompany.Models;
+﻿using CakeCompany.Contract.Models;
+using CakeCompany.Models.Enum;
 
-internal record Order(string ClientName, DateTime EstimatedDeliveryTime, int Id, Cake Name, double Quantity);
+namespace CakeCompany.Models;
+
+public record Order(string ClientName, DateTime EstimatedDeliveryTime, int Id, Cake Name, double Quantity);

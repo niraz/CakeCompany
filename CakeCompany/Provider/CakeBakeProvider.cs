@@ -1,8 +1,31 @@
-﻿using CakeCompany.Models;
+﻿using CakeCompany.Contract.Provider;
+using CakeCompany.Factory;
+using CakeCompany.Models;
+using Microsoft.Extensions.Logging;
 
 namespace CakeCompany.Provider;
 
-internal class CakeProvider
+public class CakeBakeProvider : ICakeBakeProvider
+{
+    private readonly ILogger<CakeBakeProvider> _logger;
+    public CakeBakeProvider(ILogger<CakeBakeProvider> logger)
+    {
+        _logger = logger;
+    }
+    public Product Bake(Order order)
+    {
+        _logger.LogInformation($"Creating cake {order.Name} for order with Id {order.Id}.");
+        return new()
+        {
+            Cake = CreateCakeFactory.Create( order.Name),
+            Id = Guid.NewGuid(),
+            Quantity = order.Quantity
+        };
+    }
+    
+}
+/*
+ * internal class CakeProvider
 {
     public DateTime Check(Order order)
     {
@@ -49,3 +72,4 @@ internal class CakeProvider
         }; ;
     }
 }
+ */

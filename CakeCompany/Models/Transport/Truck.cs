@@ -1,9 +1,13 @@
-﻿namespace CakeCompany.Models.Transport;
+﻿using CakeCompany.Contract.Models;
 
-internal class Truck
+namespace CakeCompany.Models.Transport;
+
+public class Truck : DeliveryMediumBase
 {
-    public bool Deliver(List<Product> products)
-    {
-        return true;
-    }
+    // Override the default behaviour if required
+    //public override bool Deliver(List<Product> products)
+    //{
+    //    // Write business logic for Deliver by Truck
+    //    return true;
+    //}
 }
